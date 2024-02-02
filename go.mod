@@ -1,4 +1,4 @@
-module go-booking
+module github.com/joshdstockdale/go-booking
 
 go 1.21.6
 
