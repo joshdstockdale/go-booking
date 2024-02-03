@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/joshdstockdale/go-booking/types"
 	"go.mongodb.org/mongo-driver/bson"
@@ -11,7 +12,13 @@ import (
 
 const userColl = "users"
 
+type Dropper interface {
+	Drop(context.Context) error
+}
+
 type UserStore interface {
+	Dropper
+
 	GetUserByID(context.Context, string) (*types.User, error)
 	GetUsers(context.Context) ([]*types.User, error)
 	InsertUser(context.Context, *types.User) (*types.User, error)
@@ -25,12 +32,18 @@ type MongoUserStore struct {
 	coll   *mongo.Collection
 }
 
-func NewMongoUserStore(client *mongo.Client) *MongoUserStore {
+func NewMongoUserStore(client *mongo.Client, dbname string) *MongoUserStore {
 	return &MongoUserStore{
 		client: client,
-		coll:   client.Database(DBNAME).Collection(userColl),
+		coll:   client.Database(dbname).Collection(userColl),
 	}
 }
+
+func (s *MongoUserStore) Drop(ctx context.Context) error {
+	fmt.Print("...Dropping User Collection")
+	return s.coll.Drop(ctx)
+}
+
 func (s *MongoUserStore) UpdateUser(ctx context.Context, filter bson.M, params types.UpdateUserParams) error {
 	update := bson.D{{"$set", params.ToBSON()}}
 	_, err := s.coll.UpdateOne(ctx, filter, update)
@@ -39,6 +52,7 @@ func (s *MongoUserStore) UpdateUser(ctx context.Context, filter bson.M, params t
 	}
 	return nil
 }
+
 func (s *MongoUserStore) DeleteUser(ctx context.Context, id string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -52,6 +66,7 @@ func (s *MongoUserStore) DeleteUser(ctx context.Context, id string) error {
 	return nil
 
 }
+
 func (s *MongoUserStore) InsertUser(ctx context.Context, user *types.User) (*types.User, error) {
 	res, err := s.coll.InsertOne(ctx, user)
 	if err != nil {
