@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joshdstockdale/go-booking/api"
+	"github.com/joshdstockdale/go-booking/api/middleware"
 	"github.com/joshdstockdale/go-booking/db"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -30,9 +31,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	app := fiber.New(config)
-	apiv1 := app.Group("/api/v1")
-
 	var (
 		userStore  = db.NewMongoUserStore(client)
 		hotelStore = db.NewMongoHotelStore(client)
@@ -42,10 +40,19 @@ func main() {
 			Hotel: hotelStore,
 			Room:  roomStore,
 		}
+		authHandler  = api.NewAuthHandler(userStore)
 		userHandler  = api.NewUserHandler(userStore)
 		hotelHandler = api.NewHotelHandler(store)
+		roomHandler  = api.NewRoomHandler(store)
+		app          = fiber.New(config)
+		auth         = app.Group("/api")
+		apiv1        = app.Group("/api/v1", middleware.JWTAuthentication(userStore))
 	)
 
+	//auth
+	auth.Post("/auth", authHandler.HandleAuth)
+
+	//Versioned API Routes
 	//user handlers
 	apiv1.Put("/user/:id", userHandler.HandlePutUser)
 	apiv1.Delete("/user/:id", userHandler.HandleDeleteUser)
@@ -57,5 +64,6 @@ func main() {
 	apiv1.Get("/hotel", hotelHandler.HandleGetHotels)
 	apiv1.Get("/hotel/:id", hotelHandler.HandleGetHotel)
 	apiv1.Get("/hotel/:id/rooms", hotelHandler.HandleGetRooms)
+	apiv1.Post("/room/:id/book", roomHandler.HandleBookRoom)
 	app.Listen(*listenAddr)
 }
