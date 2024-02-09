@@ -18,7 +18,7 @@ const (
 	minLastNameLen  = 2
 	minPasswordLen  = 7
 	minErrorMsg     = "length should be at least %d characters"
-	invalidMsg      = "invalid"
+	invalidMsg      = "email '%s' is invalid"
 )
 
 type UpdateUserParams struct {
@@ -56,7 +56,7 @@ func (params InsertUserParams) Validate() map[string]string {
 		errors["password"] = fmt.Sprintf(minErrorMsg, minPasswordLen)
 	}
 	if !isEmailValid(params.Email) {
-		errors["email"] = fmt.Sprintf(invalidMsg)
+		errors["email"] = fmt.Sprintf(invalidMsg, params.Email)
 	}
 	return errors
 }
@@ -94,6 +94,7 @@ type User struct {
 	LastName          string             `bson:"lastName" json:"lastName"`
 	Email             string             `bson:"email" json:"email"`
 	EncryptedPassword string             `bson:"Encryptedpassword" json:"-"`
+	IsAdmin           bool               `bson: "isAdmin" json"isAdmin"`
 }
 
 func NewUserFromParams(params InsertUserParams) (*User, error) {
