@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/joshdstockdale/go-booking/db"
@@ -34,6 +35,8 @@ func seedUser(isAdmin bool, fname, lname, email, password string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	token, _ := types.CreateTokenFromUser(user)
+	fmt.Printf("%s -> %s\n", user.Email, token)
 }
 
 func seedHotel(name string, location string, rating int) {
