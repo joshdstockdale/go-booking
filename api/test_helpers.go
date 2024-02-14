@@ -25,6 +25,9 @@ func (tdb *testdb) teardown(t *testing.T) {
 }
 
 func setup(t *testing.T) *testdb {
+	if err := godotenv.Load("../.env"); err != nil {
+		log.Fatal(err)
+	}
 	dburi := os.Getenv("MONGO_DB_URL_TEST")
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(dburi))
 	if err != nil {
@@ -39,11 +42,5 @@ func setup(t *testing.T) *testdb {
 			Room:    db.NewMongoRoomStore(client, hotelStore),
 			Booking: db.NewMongoBookingStore(client),
 		},
-	}
-}
-
-func init() {
-	if err := godotenv.Load("../.env"); err != nil {
-		log.Fatal(err)
 	}
 }

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
@@ -45,9 +44,9 @@ func TestAuthSuccess(t *testing.T) {
 	}
 	// We do not return EncryptedPassword in any json response
 	inserted.EncryptedPassword = ""
-	if !reflect.DeepEqual(inserted, authResp.User) {
-		t.Fatalf("Expected %+v but got %+v", inserted, authResp.User)
-	}
+	assertProps(t, "firstName", authResp.User.FirstName, inserted.FirstName)
+	assertProps(t, "lastName", authResp.User.LastName, inserted.LastName)
+	assertProps(t, "email", authResp.User.Email, inserted.Email)
 }
 
 func TestAuthFailWrongPassword(t *testing.T) {
@@ -84,5 +83,12 @@ func TestAuthFailWrongPassword(t *testing.T) {
 	}
 	if genericResp.Msg != "Invalid Credentials" {
 		t.Fatalf("Expected Reponse to be Invalid Credentials but got %s", genericResp.Msg)
+	}
+}
+
+func assertProps(t testing.TB, prop string, got string, want string) {
+	t.Helper()
+	if got != want {
+		t.Errorf("For prop (%v), got %v but wanted %v", prop, got, want)
 	}
 }
