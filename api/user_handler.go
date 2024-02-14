@@ -5,8 +5,6 @@ import (
 
 	"github.com/joshdstockdale/go-booking/db"
 	"github.com/joshdstockdale/go-booking/types"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/gofiber/fiber/v2"
@@ -28,19 +26,15 @@ func (h *UserHandler) HandlePutUser(c *fiber.Ctx) error {
 		params types.UpdateUserParams
 		userID = c.Params("id")
 	)
-	oid, err := primitive.ObjectIDFromHex(userID)
-	if err != nil {
-		return ErrInvalidID()
-	}
 	if err := c.BodyParser(&params); err != nil {
 		return ErrBadRequest()
 	}
-	filter := bson.M{"_id": oid}
-	if err := h.userStore.UpdateUser(c.Context(), filter, params); err != nil {
+	if err := h.userStore.UpdateUser(c.Context(), userID, params); err != nil {
 		return err
 	}
 	return c.JSON(map[string]string{"updated": userID})
 }
+
 func (h *UserHandler) HandleDeleteUser(c *fiber.Ctx) error {
 	userID := c.Params("id")
 	if err := h.userStore.DeleteUser(c.Context(), userID); err != nil {
@@ -48,6 +42,7 @@ func (h *UserHandler) HandleDeleteUser(c *fiber.Ctx) error {
 	}
 	return c.JSON(map[string]string{"deleted": userID})
 }
+
 func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 	var params types.InsertUserParams
 	if err := c.BodyParser(&params); err != nil {
@@ -66,6 +61,7 @@ func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 	}
 	return c.JSON(insertedUser)
 }
+
 func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 	var (
 		id = c.Params("id")
@@ -79,6 +75,7 @@ func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 	}
 	return c.JSON(user)
 }
+
 func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
 	users, err := h.userStore.GetUsers(c.Context())
 	if err != nil {

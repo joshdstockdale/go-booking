@@ -3,7 +3,6 @@ package api
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/joshdstockdale/go-booking/db"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type BookingHandler struct {
@@ -29,14 +28,14 @@ func (h *BookingHandler) HandleCancelBooking(c *fiber.Ctx) error {
 	if booking.UserID != user.ID {
 		return ErrUnAuthorized()
 	}
-	if err := h.store.Booking.Update(c.Context(), id, bson.M{"canceled": true}); err != nil {
+	if err := h.store.Booking.Update(c.Context(), id, db.Map{"canceled": true}); err != nil {
 		return err
 	}
 	return c.JSON(genericResponse{Type: "success", Msg: "Updated"})
 }
 
 func (h *BookingHandler) HandleGetBookings(c *fiber.Ctx) error {
-	bookings, err := h.store.Booking.Get(c.Context(), bson.M{})
+	bookings, err := h.store.Booking.Get(c.Context(), db.Map{})
 	if err != nil {
 		return ErrNotFound("Bookings")
 	}

@@ -96,7 +96,7 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 
 func (h *RoomHandler) isRoomAvailable(c context.Context, oid primitive.ObjectID, params BookRoomParams) (bool, error) {
 
-	where := bson.M{
+	where := db.Map{
 		"roomID": oid,
 		"fromDate": bson.M{
 			"$gte": params.FromDate,

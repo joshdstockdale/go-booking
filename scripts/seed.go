@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"time"
 
 	"github.com/joshdstockdale/go-booking/db"
@@ -41,4 +42,9 @@ func main() {
 		&store, user.ID, room.ID, 2, time.Now(), time.Now().AddDate(0, 0, 2),
 	)
 	fmt.Println("--Booking:", booking.ID)
+	for i := 0; i < 100; i++ {
+		name := fmt.Sprintf("Hotel %d", i)
+		location := fmt.Sprintf("loc %d", i)
+		fixtures.InsertHotel(&store, name, location, rand.Intn(5)+1)
+	}
 }
