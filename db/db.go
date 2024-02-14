@@ -1,10 +1,6 @@
 package db
 
-const (
-	DBNAME     = "hotel-reservation"
-	TestDBNAME = "hotel-reservation-test"
-	DBURI      = "mongodb://localhost:27017"
-)
+const MongoDBEnvName = "MONGO_DB_NAME"
 
 type Map map[string]any
 

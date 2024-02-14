@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"flag"
 	"log"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
 	"github.com/joshdstockdale/go-booking/api"
 	"github.com/joshdstockdale/go-booking/db"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -18,10 +19,8 @@ var config = fiber.Config{ErrorHandler: api.ErrorHandler}
 
 func main() {
 
-	listenAddr := flag.String("listenAddr", ":5000", "Listen address of the API Server")
-	flag.Parse()
-
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DBURI))
+	mongoUrl := os.Getenv("MONGO_DB_URL")
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mongoUrl))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -75,5 +74,13 @@ func main() {
 	//admin routes
 	admin.Get("/booking", bookingHandler.HandleGetBookings)
 
-	app.Listen(*listenAddr)
+	listenAddr := os.Getenv("HTTP_LISTEN_ADDRESS")
+	app.Listen(listenAddr)
+}
+
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 }
